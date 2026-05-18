@@ -77,21 +77,44 @@ Two layers:
 
 ## Validated results
 
-Tested on Modal across 3 GPU architectures and 9 configurations:
+36 experiments across 3 GPU architectures, 9 configurations, 3 models. All tests on Modal with real hardware. Full details in [WRITEUP.md](WRITEUP.md).
 
-| GPU | Config | Cold start | Reduction | Restore rate |
-|-----|--------|-----------|-----------|-------------|
-| H100 x2 | CUDA graphs, TP=2 | 4.0s | 98.2% | — |
-| H100 x4 | Eager, TP=4 | 6.5s | 93.4% | — |
-| A100 x2 | Eager, TP=2 | 3.5s | 96.8% | — |
-| L4 | Eager, TP=1 | 4.0s | 93.9% | — |
-| T4 | Raw PyTorch (no vLLM) | — | — | 3.7 GB/s |
+### vLLM multi-GPU (the main result)
 
-Generic layer validated against raw PyTorch on T4:
+| Config | Model | GPU | TP | Startup | Cold Start | Reduction | Inference |
+|--------|-------|-----|-----|---------|-----------|-----------|-----------|
+| Eager | Qwen2-7B | H100 | 1 | 45.2s | 3.56s | 92.1% | 0.40s |
+| Eager | Qwen2-7B | H100 | 2 | 102.4s | 4.87s | 95.3% | 0.63s |
+| Eager | Qwen2-7B | H100 | 4 | 97.4s | 6.45s | 93.4% | 0.39s |
+| Eager | Qwen2-7B | A100 | 2 | 108.4s | 3.46s | 96.8% | 0.529s |
+| Eager | Qwen2-7B | L4 | 1 | 66.3s | 4.04s | 93.9% | 1.894s |
+| Eager | TinyLlama-1.1B | H100 | 2 | 57.2s | 4.33s | 92.4% | 0.221s |
+| CUDA graphs | Qwen2-7B | H100 | 2 | 224.5s | 4.0s | 98.2% | 0.199s |
+| CUDA graphs | Qwen2-7B | A100 | 2 | 338.1s | 14.99s | 95.6% | 0.353s |
+| AWQ + CUDA graphs | Qwen2-7B-AWQ | H100 | 2 | 310.7s | 4.97s | 98.4% | 0.733s |
+
+### Stability and correctness
+
+- **10-cycle stability**: zero memory leaks, 3.22s avg restore, all outputs identical ([benchmark](benchmarks/vllm_10cycle_stability.py))
+- **Error recovery**: invalid PID, double checkpoint, double restore, rapid cycling — all handled safely ([benchmark](benchmarks/vllm_error_recovery.py))
+- **Model-agnostic**: validated on Qwen2-7B, Qwen2-7B-AWQ, TinyLlama-1.1B
+- **CUDA graphs**: survive checkpoint/restore on H100, 3x faster post-restore inference
+
+### Generic layer (no vLLM)
+
+Validated against raw PyTorch on T4 ([test](tests/modal_test_generic.py)):
 - Tensor values survive checkpoint/restore
 - `nn.Module` forward + backward pass work post-restore
 - CUDA graphs replay correctly after restore
-- 10.7 GB allocation, 5-cycle stable, zero memory leaks
+- 10.7 GB allocation, 5-cycle stable, 3.7 GB/s restore rate
+
+### GPU recommendations
+
+| GPU | CUDA graphs? | Expected cold start | Notes |
+|-----|-------------|-------------------|-------|
+| H100 | Yes (recommended) | 4.0-5.0s | 3x faster post-restore inference |
+| A100 | No (enforce-eager) | 3.5s | CUDA graphs add 4x restore overhead on A100 |
+| L4 | No (enforce-eager) | 4.0s | Single GPU, inference 4.7x slower than H100 |
 
 ## vLLM CLI
 
@@ -119,6 +142,25 @@ kubectl apply -f deploy/kubernetes/vllm-checkpoint-sidecar.yaml
 
 # Docker Compose — local dev
 docker compose -f deploy/docker-compose/docker-compose.yaml up
+```
+
+## Benchmarks
+
+Reproducible Modal scripts in `benchmarks/`:
+
+| Script | What it tests |
+|--------|--------------|
+| `vllm_single_gpu.py` | Single GPU vllm serve, 92.1% reduction |
+| `vllm_multi_gpu_tp2.py` | TP=2 on H100x2, 95.3% reduction |
+| `vllm_multi_gpu_tp4.py` | TP=4 on H100x4, 93.4% reduction |
+| `vllm_cuda_graphs_tp2.py` | CUDA graphs + TP=2, 98.2% reduction |
+| `vllm_10cycle_stability.py` | 10 cycles, zero memory leaks |
+| `vllm_error_recovery.py` | 6 failure scenarios, all handled |
+| `vllm_a100_portability.py` | A100 hardware validation, 96.8% |
+| `vllm_l4_single_gpu.py` | L4 single GPU, 93.9% |
+
+```bash
+modal run benchmarks/vllm_multi_gpu_tp2.py
 ```
 
 ## Multi-GPU gap
