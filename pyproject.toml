@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cuda-checkpoint-vllm"
+name = "cuda-checkpoint"
 version = "0.1.0"
-description = "Multi-GPU CUDA checkpoint/restore — 92-98% cold start reduction. Generic core + vLLM integration."
+description = "Multi-GPU CUDA checkpoint/restore for any CUDA process. 92-98% cold start reduction."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
