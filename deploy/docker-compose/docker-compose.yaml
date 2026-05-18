@@ -1,0 +1,70 @@
+version: "3.8"
+
+# vLLM + checkpoint sidecar — local development setup
+# Requires: NVIDIA Container Toolkit, driver 570+, cuda-checkpoint binary
+#
+# Usage:
+#   docker compose up
+#   curl http://localhost:8000/v1/completions \
+#     -H "Content-Type: application/json" \
+#     -d '{"model": "Qwen/Qwen2-7B-Instruct", "prompt": "Hello", "max_tokens": 32}'
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    command:
+      - --model
+      - Qwen/Qwen2-7B-Instruct
+      - --enforce-eager
+      - --gpu-memory-utilization
+      - "0.80"
+      - --max-model-len
+      - "4096"
+      - --port
+      - "8000"
+    environment:
+      CUDA_MODULE_LOADING: EAGER
+      NCCL_NVLS_ENABLE: "0"
+      NCCL_P2P_DISABLE: "1"
+      VLLM_USE_V1: "1"
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    pid: host
+    ipc: host
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  checkpoint-sidecar:
+    image: vllm/vllm-openai:latest
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        pip install -q cuda-checkpoint-vllm[serve] && \
+        cd /opt && git clone --depth 1 https://github.com/NVIDIA/cuda-checkpoint.git 2>/dev/null || true && \
+        export PATH=/opt/cuda-checkpoint/bin/x86_64_Linux:$$PATH && \
+        echo "Waiting for vllm to be healthy..." && \
+        until curl -sf http://vllm:8000/health; do sleep 5; done && \
+        echo "vllm healthy, starting checkpoint watch..." && \
+        vllm-ckpt watch --port 8000 --interval 300 --json
+    environment:
+      CUDA_MODULE_LOADING: EAGER
+    pid: host
+    cap_add:
+      - SYS_PTRACE
+    depends_on:
+      vllm:
+        condition: service_healthy
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
