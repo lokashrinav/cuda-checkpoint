@@ -121,14 +121,13 @@ kubectl apply -f deploy/kubernetes/vllm-checkpoint-sidecar.yaml
 docker compose -f deploy/docker-compose/docker-compose.yaml up
 ```
 
-## Why not just use Modal GPU snapshots?
+## Multi-GPU gap
 
-Modal's GPU snapshots use cuda-checkpoint under the hood but are **single-GPU only** (they list multi-GPU as "known issues"). This library adds:
+NVIDIA's `cuda-checkpoint` CLI works on single processes. Most GPU workloads (tensor parallelism, distributed training) spawn multiple CUDA processes. This library bridges that gap:
 
-1. **Multi-GPU support** — parallel checkpoint/restore across all tensor-parallel PIDs
-2. **43-73% faster restore** — ThreadPoolExecutor parallelism + sleep optimization
-3. **Framework-agnostic** — works with any CUDA process, not tied to a platform
-4. **Any infrastructure** — bare metal, K8s, ECS, GKE, not just Modal
+1. **Multi-GPU support** — parallel checkpoint/restore across all CUDA PIDs in a process tree
+2. **43-73% faster restore** — ThreadPoolExecutor parallelism + optional sleep optimization
+3. **Framework-agnostic** — works with any CUDA process, not tied to a specific inference server
 
 ## License
 
