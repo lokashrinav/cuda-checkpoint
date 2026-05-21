@@ -68,7 +68,7 @@ spec:
             - /bin/bash
             - -c
             - |
-              pip install cuda-checkpoint-vllm[vllm] && \
+              pip install gpu-checkpoint-orchestrator[vllm] && \
               cd /opt && git clone --depth 1 https://github.com/NVIDIA/cuda-checkpoint.git && \
               export PATH=/opt/cuda-checkpoint/bin/x86_64_Linux:$PATH && \
               vllm-ckpt watch --port 8000 --interval 300 --json

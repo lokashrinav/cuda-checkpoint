@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cuda-checkpoint"
+name = "gpu-checkpoint-orchestrator"
 version = "0.1.0"
 description = "Multi-GPU CUDA checkpoint/restore for any CUDA process. 92-98% cold start reduction."
 readme = "README.md"
@@ -16,7 +16,7 @@ vllm = ["httpx"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-vllm-ckpt = "cuda_checkpoint_vllm.cli:main"
+vllm-ckpt = "gpu_checkpoint_orchestrator_vllm.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

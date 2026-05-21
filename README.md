@@ -1,4 +1,4 @@
-# cuda-checkpoint
+# gpu-checkpoint-orchestrator
 
 NVIDIA's `cuda-checkpoint` works on single processes. Real GPU workloads — tensor parallelism, distributed training, multi-GPU inference — spawn multiple CUDA processes that must be checkpointed together. Lock all PIDs before checkpointing any, or NCCL deadlocks. This library solves that.
 
@@ -26,7 +26,7 @@ This library handles that: discovers all CUDA-active PIDs in a process tree, loc
 ## Quick start
 
 ```python
-from cuda_checkpoint import CudaCheckpointAPI, MultiGPUCheckpointer, discover_cuda_pids
+from gpu_checkpoint_orchestrator import CudaCheckpointAPI, MultiGPUCheckpointer, discover_cuda_pids
 
 # Single process
 api = CudaCheckpointAPI()
@@ -45,10 +45,10 @@ mgpu.restore()                         # all GPUs restored concurrently
 ## Install
 
 ```bash
-pip install cuda-checkpoint
+pip install gpu-checkpoint-orchestrator
 
 # With vLLM CLI integration
-pip install cuda-checkpoint[vllm]
+pip install gpu-checkpoint-orchestrator[vllm]
 ```
 
 ## Requirements
@@ -109,7 +109,7 @@ Validated against raw PyTorch on T4 ([test](tests/modal_test_generic.py)):
 
 Two layers:
 
-### `cuda_checkpoint` -- generic core
+### `gpu_checkpoint_orchestrator` -- generic core
 
 | Module | What it does |
 |--------|-------------|
@@ -117,7 +117,7 @@ Two layers:
 | `multi_gpu.py` | `MultiGPUCheckpointer` — locks all PIDs first, then checkpoints/restores in parallel via ThreadPoolExecutor |
 | `discover.py` | `discover_cuda_pids()` — walks process tree, probes each PID for CUDA activity |
 
-### `cuda_checkpoint_vllm` -- vLLM integration (optional)
+### `gpu_checkpoint_orchestrator_vllm` -- vLLM integration (optional)
 
 | Module | What it does |
 |--------|-------------|

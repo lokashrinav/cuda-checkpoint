@@ -14,8 +14,8 @@ import json
 import sys
 import time
 
-from cuda_checkpoint import CudaCheckpointAPI, MultiGPUCheckpointer, discover_cuda_pids
-from cuda_checkpoint.discover import find_process_by_name
+from gpu_checkpoint_orchestrator import CudaCheckpointAPI, MultiGPUCheckpointer, discover_cuda_pids
+from gpu_checkpoint_orchestrator.discover import find_process_by_name
 
 
 def _resolve_pid(args) -> int:

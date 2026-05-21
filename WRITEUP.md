@@ -415,12 +415,12 @@ CLI commands validated: `discover`, `cycle`, `benchmark`, `--sequential` flag. T
 
 ### Pip package validation (v23)
 
-Validated the complete pip-installable package (`vllm_cuda_ckpt`) on H100x2 with `vllm serve` TP=2.
+Validated the complete pip-installable package (`gpu_checkpoint_orchestrator`) on H100x2 with `vllm serve` TP=2.
 
 | Metric | Value |
 |---|---|
 | `pip install -e .` | OK |
-| `from vllm_cuda_ckpt import ...` | OK |
+| `from gpu_checkpoint_orchestrator import ...` | OK |
 | `vllm-ckpt` CLI binary | OK |
 | Python API cold start | 4.84s (95.2% reduction) |
 | CLI cold start | 4.70s |
@@ -428,10 +428,10 @@ Validated the complete pip-installable package (`vllm_cuda_ckpt`) on H100x2 with
 | CUDA PIDs | 4 |
 
 ```bash
-pip install vllm-cold-start[serve]
+pip install gpu-checkpoint-orchestrator[vllm]
 
 # Python API
-from vllm_cuda_ckpt import CudaCheckpointAPI, discover_cuda_pids
+from gpu_checkpoint_orchestrator import CudaCheckpointAPI, discover_cuda_pids
 pids = discover_cuda_pids(server_pid)
 api = CudaCheckpointAPI()
 
@@ -823,7 +823,7 @@ Logic: sm_9.x (H100) → CUDA graphs enabled, all other architectures → `--enf
 | `tests/test_cuda_ckpt.py` | 28 unit tests: API, discover, CLI, orchestrator (all pass without GPU) |
 | `deploy/kubernetes/` | K8s manifest: vLLM + checkpoint sidecar with health probes |
 | `deploy/docker-compose/` | Docker Compose: vLLM + checkpoint sidecar for local dev |
-| `src/vllm_cuda_ckpt/` | Pip-installable package: api.py, discover.py, cli.py |
+| `src/gpu_checkpoint_orchestrator/` | Pip-installable package: api.py, discover.py, cli.py |
 | `cuda_serializer/modal_multigpu_v2.py` | Checkpoint/restore without NCCL reinit (4 configs, GPU ops only) |
 | `cuda_serializer/modal_multigpu_vllm.py` | Phase 42 Attempt 23: root cause discovery (stale context cleanup) |
 | `src/vllm_profile_cache/foundry_graphs.py` | Foundry integration: profile cache, graph persistence, force-capture mode |

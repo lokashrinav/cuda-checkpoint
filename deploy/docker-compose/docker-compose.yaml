@@ -51,7 +51,7 @@ services:
     command:
       - -c
       - |
-        pip install -q cuda-checkpoint-vllm[vllm] && \
+        pip install -q gpu-checkpoint-orchestrator[vllm] && \
         cd /opt && git clone --depth 1 https://github.com/NVIDIA/cuda-checkpoint.git 2>/dev/null || true && \
         export PATH=/opt/cuda-checkpoint/bin/x86_64_Linux:$$PATH && \
         echo "Waiting for vllm to be healthy..." && \

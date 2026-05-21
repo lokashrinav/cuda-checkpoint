@@ -26,8 +26,8 @@ image = (
 )
 
 PKG_INIT = '''
-from vllm_cuda_ckpt.api import CudaCheckpointAPI, VLLMCheckpointer
-from vllm_cuda_ckpt.discover import discover_cuda_pids, find_vllm_server
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI, VLLMCheckpointer
+from gpu_checkpoint_orchestrator.discover import discover_cuda_pids, find_vllm_server
 __all__ = ["CudaCheckpointAPI", "VLLMCheckpointer", "discover_cuda_pids", "find_vllm_server"]
 '''
 
@@ -102,8 +102,8 @@ class VLLMCheckpointer:
 
 PKG_CLI = r'''
 import argparse, json, sys, time
-from vllm_cuda_ckpt.api import CudaCheckpointAPI
-from vllm_cuda_ckpt.discover import discover_cuda_pids, find_vllm_server
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
+from gpu_checkpoint_orchestrator.discover import discover_cuda_pids, find_vllm_server
 from concurrent.futures import ThreadPoolExecutor
 
 def _resolve_pid(args):
@@ -249,7 +249,7 @@ dependencies = []
 serve = ["httpx"]
 
 [project.scripts]
-vllm-ckpt = "vllm_cuda_ckpt.cli:main"
+vllm-ckpt = "gpu_checkpoint_orchestrator.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -308,7 +308,7 @@ def get_gpu_memory():
 
 
 try:
-    from vllm_cuda_ckpt import CudaCheckpointAPI, discover_cuda_pids, find_vllm_server
+    from gpu_checkpoint_orchestrator import CudaCheckpointAPI, discover_cuda_pids, find_vllm_server
     from concurrent.futures import ThreadPoolExecutor
 
     print("=" * 60, flush=True)
@@ -530,7 +530,7 @@ def test_stability_v27():
     import subprocess, sys, json, tempfile
 
     pkg_dir = "/tmp/vllm_cold_start_pkg"
-    src_dir = f"{pkg_dir}/src/vllm_cuda_ckpt"
+    src_dir = f"{pkg_dir}/src/gpu_checkpoint_orchestrator"
     os.makedirs(src_dir, exist_ok=True)
 
     with open(f"{src_dir}/__init__.py", "w") as f:

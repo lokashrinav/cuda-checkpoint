@@ -10,13 +10,13 @@ import os
 import time
 from typing import Optional
 
-from cuda_checkpoint.api import CudaCheckpointAPI
-from cuda_checkpoint.multi_gpu import MultiGPUCheckpointer
-from cuda_checkpoint.discover import discover_cuda_pids
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
+from gpu_checkpoint_orchestrator.multi_gpu import MultiGPUCheckpointer
+from gpu_checkpoint_orchestrator.discover import discover_cuda_pids
 
 
 class VLLMCheckpointer:
-    """Orchestrates cuda-checkpoint for a running vLLM LLM instance.
+    """Orchestrates GPU checkpoint/restore for a running vLLM LLM instance.
 
     Works with the Python LLM class (needs engine reference).
     For external process management, use the CLI.

@@ -1,6 +1,6 @@
 """vLLM-specific process discovery."""
 
-from cuda_checkpoint.discover import find_process_by_name
+from gpu_checkpoint_orchestrator.discover import find_process_by_name
 
 
 def find_vllm_server() -> int:

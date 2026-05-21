@@ -1,4 +1,4 @@
-"""Tests for cuda_checkpoint.api — generic CUDA checkpoint bindings."""
+"""Tests for gpu_checkpoint_orchestrator.api — generic CUDA checkpoint bindings."""
 
 from unittest.mock import MagicMock, patch
 import pytest
@@ -15,7 +15,7 @@ class TestCudaCheckpointAPI:
                 fn.return_value = 0
                 setattr(mock_lib, f"cuCheckpointProcess{name}", fn)
 
-            from cuda_checkpoint.api import CudaCheckpointAPI
+            from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
             api = CudaCheckpointAPI()
             return api, mock_lib
 

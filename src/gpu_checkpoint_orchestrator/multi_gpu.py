@@ -10,7 +10,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
-from cuda_checkpoint.api import CudaCheckpointAPI
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
 
 class MultiGPUCheckpointer:
@@ -22,7 +22,7 @@ class MultiGPUCheckpointer:
       Parallel + pre-checkpoint memory free: 3.1s restore (66% faster)
 
     Usage:
-        from cuda_checkpoint import MultiGPUCheckpointer, discover_cuda_pids
+        from gpu_checkpoint_orchestrator import MultiGPUCheckpointer, discover_cuda_pids
 
         pids = discover_cuda_pids(server_pid)
         mgpu = MultiGPUCheckpointer(pids)

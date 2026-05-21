@@ -1,4 +1,4 @@
-"""Modal integration test: generic cuda_checkpoint against raw PyTorch.
+"""Modal integration test: generic gpu_checkpoint_orchestrator against raw PyTorch.
 
 Validates that the generic layer (no vLLM) works with any CUDA process.
 Tests: single-GPU, multi-GPU, tensor correctness after restore.
@@ -6,7 +6,7 @@ Tests: single-GPU, multi-GPU, tensor correctness after restore.
 
 import modal
 
-app = modal.App("cuda-checkpoint-generic-test")
+app = modal.App("gpu-checkpoint-orchestrator-generic-test")
 
 CUDA_CHECKPOINT_SETUP = """
 cd /opt && git clone --depth 1 https://github.com/NVIDIA/cuda-checkpoint.git 2>/dev/null || true
@@ -14,9 +14,9 @@ export PATH=/opt/cuda-checkpoint/bin/x86_64_Linux:$PATH
 """
 
 GENERIC_PKG_INIT = '''
-from cuda_checkpoint.api import CudaCheckpointAPI
-from cuda_checkpoint.multi_gpu import MultiGPUCheckpointer
-from cuda_checkpoint.discover import discover_cuda_pids, find_cuda_pids_for_process
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
+from gpu_checkpoint_orchestrator.multi_gpu import MultiGPUCheckpointer
+from gpu_checkpoint_orchestrator.discover import discover_cuda_pids, find_cuda_pids_for_process
 __all__ = ["CudaCheckpointAPI", "MultiGPUCheckpointer", "discover_cuda_pids", "find_cuda_pids_for_process"]
 '''
 
@@ -91,7 +91,7 @@ class CudaCheckpointAPI:
 GENERIC_PKG_MULTI_GPU = '''
 import time
 from concurrent.futures import ThreadPoolExecutor
-from cuda_checkpoint.api import CudaCheckpointAPI
+from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
 class MultiGPUCheckpointer:
     def __init__(self, pids, parallel=True):
@@ -216,9 +216,9 @@ image = (
 
 
 def _install_pkg():
-    """Write the cuda_checkpoint package to the container."""
+    """Write the gpu_checkpoint_orchestrator package to the container."""
     import os
-    pkg_dir = "/tmp/cuda_checkpoint"
+    pkg_dir = "/tmp/gpu_checkpoint_orchestrator"
     os.makedirs(pkg_dir, exist_ok=True)
 
     with open(f"{pkg_dir}/__init__.py", "w") as f:
@@ -242,7 +242,7 @@ def test_single_gpu_raw_pytorch():
     import os
     import time
     import torch
-    from cuda_checkpoint.api import CudaCheckpointAPI
+    from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
     print("=" * 60)
     print("  TEST 1: Single GPU — Raw PyTorch")
@@ -320,7 +320,7 @@ def test_single_gpu_model_inference():
     import time
     import torch
     import torch.nn as nn
-    from cuda_checkpoint.api import CudaCheckpointAPI
+    from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
     print("=" * 60)
     print("  TEST 2: Single GPU — PyTorch Model Inference")
@@ -396,7 +396,7 @@ def test_single_gpu_multi_gpu_checkpointer():
     import os
     import time
     import torch
-    from cuda_checkpoint.multi_gpu import MultiGPUCheckpointer
+    from gpu_checkpoint_orchestrator.multi_gpu import MultiGPUCheckpointer
 
     print("=" * 60)
     print("  TEST 3: MultiGPUCheckpointer — Single GPU")
@@ -444,7 +444,7 @@ def test_cuda_graphs_survive():
     import os
     import time
     import torch
-    from cuda_checkpoint.api import CudaCheckpointAPI
+    from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
     print("=" * 60)
     print("  TEST 4: CUDA Graphs Survive Checkpoint/Restore")
@@ -508,7 +508,7 @@ def test_large_allocation():
     import os
     import time
     import torch
-    from cuda_checkpoint.api import CudaCheckpointAPI
+    from gpu_checkpoint_orchestrator.api import CudaCheckpointAPI
 
     print("=" * 60)
     print("  TEST 5: Large GPU Allocation (~10GB)")
@@ -563,7 +563,7 @@ def main():
     import json
 
     print("=" * 60)
-    print("  GENERIC cuda_checkpoint VALIDATION")
+    print("  GENERIC gpu_checkpoint_orchestrator VALIDATION")
     print("  No vLLM — raw PyTorch on T4")
     print("=" * 60)
     print()

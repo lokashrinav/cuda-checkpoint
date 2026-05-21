@@ -1,4 +1,4 @@
-"""Tests for cuda_checkpoint.multi_gpu — parallel orchestration."""
+"""Tests for gpu_checkpoint_orchestrator.multi_gpu — parallel orchestration."""
 
 from unittest.mock import MagicMock, patch
 import pytest
@@ -15,7 +15,7 @@ class TestMultiGPUCheckpointer:
                 fn.return_value = 0
                 setattr(mock_lib, f"cuCheckpointProcess{name}", fn)
 
-            from cuda_checkpoint.multi_gpu import MultiGPUCheckpointer
+            from gpu_checkpoint_orchestrator.multi_gpu import MultiGPUCheckpointer
             mgpu = MultiGPUCheckpointer(pids or [100, 200, 300])
             return mgpu, mock_lib
 
@@ -44,7 +44,7 @@ class TestMultiGPUCheckpointer:
             mgpu.checkpoint()
 
     def test_required_env(self):
-        from cuda_checkpoint.multi_gpu import MultiGPUCheckpointer
+        from gpu_checkpoint_orchestrator.multi_gpu import MultiGPUCheckpointer
         env = MultiGPUCheckpointer.required_env()
         assert env["CUDA_MODULE_LOADING"] == "EAGER"
         assert env["NCCL_NVLS_ENABLE"] == "0"
